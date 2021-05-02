@@ -2,6 +2,7 @@
 # include <string.h>
 # include "bison.tab.h"
 int numlin = 1;
+char *substr(char *src, int start, int end);
 %}
 
 %x comment string
@@ -11,7 +12,7 @@ integer ("+"|-)?{digit}+
 real ("+"|-)?{digit}+"."{digit}+
 name {letter}+({digit}|{letter})*
 char (\"[^\"]\")
-string (\"[^\"]*\")
+str (\"[^\"]*\")
 label [A-Z_]+({digit}|[A-Z_])*
 
 %%
@@ -74,8 +75,8 @@ label [A-Z_]+({digit}|[A-Z_])*
 
 {name}                  { yylval.name = yytext; return NAME; }
 
-{char}                  { yylval.character = substr(yytext, 1, yyleng-1); return CHAR; }
-{string}                { yylval.string = substr(yytext, 1, yyleng-1); return STRING; }
+{char}                  { yylval.str = substr(yytext, 1, yyleng-1); return CHAR; }
+{str}                   { yylval.str = substr(yytext, 1, yyleng-1); return STRING; }
 {integer}               { yylval.integer = atoi(yytext); return INTEGER; }
 {real}                  { yylval.real = atoi(yytext); return REAL;}
 
@@ -89,3 +90,20 @@ label [A-Z_]+({digit}|[A-Z_])*
 \n                 {numlin++; return EOL; } 
 .                  { yyerror("error lexico"); }
 %%
+
+char *substr (char *src, int start, int end) {
+    
+    int len = end - start;
+
+    char *dest = (char *)malloc(sizeof(char) * (len + 1));
+
+    for (int i = start; i < end && (*(src + i) != '\0'); i++)
+    {
+        *dest = *(src + i);
+        dest++;
+    }
+
+    *dest = '\0';
+
+    return dest - len;
+}
