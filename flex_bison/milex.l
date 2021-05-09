@@ -50,8 +50,9 @@ label [A-Z_]+({digit}|[A-Z_])*
 "boolean"                  { yylval.type = 4; return TYPE; }
 "char"                  { yylval.type = 5; return TYPE; }
 "string"                  { yylval.type = 6; return TYPE; }
-"vect"                  { yylval.type = 7; return TYPE; }
-"dict"                  { yylval.type = 8; return TYPE; }
+
+"vect"                  { return VECT; }
+"dict"                  { return DICT; }
 
 "if"                    { return IF;}
 "elsif"                  { return ELSE;}
