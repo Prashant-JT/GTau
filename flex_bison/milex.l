@@ -1,7 +1,7 @@
 %{
 # include <string.h>
 # include "bison.tab.h"
-int numlin = 1;
+int numlin = 1; 
 char *substr(char *src, int start, int end);
 %}
 
@@ -50,11 +50,12 @@ label [A-Z_]+({digit}|[A-Z_])*
 "boolean"                  { yylval.type = 4; return TYPE; }
 "char"                  { yylval.type = 5; return TYPE; }
 "string"                  { yylval.type = 6; return TYPE; }
-"vect"                  { yylval.type = 7; return TYPE; }
-"dict"                  { yylval.type = 8; return TYPE; }
+
+"vect"                  { return VECT; }
+"dict"                  { return DICT; }
 
 "if"                    { return IF;}
-"elsif"                  { return ELSE;}
+"elsif"                  { return ELSIF;}
 "else"                  { return ELSE;}
 "for"                   { return FOR;}
 "while"                 { return WHILE;}
@@ -86,7 +87,7 @@ label [A-Z_]+({digit}|[A-Z_])*
 <comment>\n        numlin++;
 <comment>"*"+"/"   BEGIN(INITIAL);
 
-[ \t]
+[ \t\r]
 \n                 {numlin++; return EOL; } 
 .                  { yyerror("error lexico"); }
 %%
