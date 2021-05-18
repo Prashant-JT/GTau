@@ -31,6 +31,7 @@ void yyerror(char*);
 %token EOL
 
 %nonassoc <compare> COMPARE
+%nonassoc UMINUS
 
 %right '='
 %left '+' '-'
@@ -42,14 +43,16 @@ void yyerror(char*);
 %%
 
 initial_main : /* nothing */
+             | initial_main function_definition 
+             | initial_main statement
              | initial_main function_definition EOL     
              | initial_main EOL
-             | initial_main statement EOL                                                
+             | initial_main statement EOL                                         
              ;
 
-function_definition : FUNCTION TYPE NAME '(' ')' '{' content '}'                        {printf("Declaracion de funcion (RETURN) sin parametros\n");}
-                    | FUNCTION TYPE NAME '(' parameter_function ')' '{' content '}'     {printf("Declaracion de funcion (RETURN) con parametros\n");} 
-                    | FUNCTION NAME '(' ')' '{' content '}'                             {printf("Declaracion de funcion (NO-RETURN) sin parametros\n");}
+function_definition : FUNCTION TYPE NAME '(' parameter_function ')' '{' content '}'     {printf("Declaracion de funcion (RETURN) con parametros\n");} 
+                    | FUNCTION VECT NAME '(' parameter_function ')' '{' content '}'     {printf("Declaracion de funcion (RETURN) con parametros\n");}
+                    | FUNCTION DICT NAME '(' parameter_function ')' '{' content '}'     {printf("Declaracion de funcion (RETURN) con parametros\n");}  
                     | FUNCTION NAME '(' parameter_function ')' '{' content '}'          {printf("Declaracion de funcion (NO-RETURN) con parametros\n");}          
                     ;
 
@@ -59,7 +62,12 @@ content : /* nothing */
         | statement content                                                             
         ;
 
-parameter_function : TYPE NAME                                                      
+parameter_function : /*Nothing*/ 
+                   | TYPE NAME  
+                   | VECT NAME 
+                   | DICT NAME   
+                   | VECT NAME ',' parameter_function 
+                   | DICT NAME ',' parameter_function                                                  
                    | TYPE NAME ',' parameter_function                                      
                    ;
 
@@ -85,20 +93,23 @@ more_elsif : ELSIF '(' expression ')' '{' content '}'
 builtin_functions : PRINT '(' expression ')'                                            {printf("Funcion PRINT\n");}
                   | PRINTLN '(' expression ')'                                          {printf("Funcion PRINTLN\n");}
                   | SIZE '(' NAME ')'                                                   {printf("Funcion SIZE\n");}
-                  | APPEND '(' NAME ',' NAME ')'                                        {printf("Funcion APPEND vectores\n");}
-                  | APPEND '(' NAME ',' NAME ',' NAME ')'                               {printf("Funcion APPEND diccionarios\n");}
-                  | POP '(' NAME ',' NAME ')'                                           {printf("Funcion POP\n");}
+                  | APPEND '(' NAME ',' expression ')'                                  {printf("Funcion APPEND vectores\n");}
+                  | APPEND '(' NAME ',' expression ',' expression ')'                   {printf("Funcion APPEND diccionarios\n");}
+                  | POP '(' NAME ')'                                                    {printf("Funcion POP\n");}
+                  | POP '(' NAME ',' expression ')'                                     {printf("Funcion POP\n");}
                   | CLEAR '(' NAME ')'                                                  {printf("Funcion CLEAR\n");}
-                  | GET '(' NAME ',' NAME ')'                                           {printf("Funcion GET\n");}
+                  | GET '(' NAME ',' expression ')'                                     {printf("Funcion GET\n");}
                   | CLONE '(' NAME ')'                                                  {printf("Funcion CLONE\n");}
                   ;
 
 variable_declaration  : TYPE NAME                                                       {printf("Variable declarada\n");}
-                      | TYPE NAME '=' expression                                        
+                      | TYPE NAME '=' expression                                    
                       | VECT '[' TYPE ']' NAME '=' '[' ']'                              {printf("Vector declarado y vacio\n");}
                       | VECT '[' TYPE ']' NAME '=' '[' parameter_to_function ']'        {printf("Vector declarado y asignado\n");}
+                      | VECT '[' TYPE ']' NAME '=' expression                           {printf("Diccionario declarado y asignado\n");} 
                       | DICT '[' TYPE ',' TYPE ']' NAME '=' '[' ']'                     {printf("Diccionario declarado y vacio\n");}
-                      | DICT '[' TYPE ',' TYPE ']' NAME '=' '[' parameter_to_dict ']'   {printf("Diccionario declarado y asignado\n");}                                
+                      | DICT '[' TYPE ',' TYPE ']' NAME '=' '[' parameter_to_dict ']'   {printf("Diccionario declarado y asignado\n");}   
+                      | DICT '[' TYPE ',' TYPE ']' NAME '=' expression                  {printf("Diccionario declarado y asignado\n");}                              
                       ;
 
 variable_definition : NAME '=' expression                                               {printf("Variable definida\n");}                                   
@@ -108,14 +119,15 @@ variable_definition : NAME '=' expression                                       
                     | NAME '/''=' expression                                            {printf("Variable dividida acortada\n");}
                     ;
 
-expression  : NAME                                                                                                                                     
+expression  : NAME                                                                                                                                    
             | CHAR                                                                      {printf("Variable declarada y asignada (CHAR)\n");}
             | STRING                                                                    {printf("Variable declarada y asignada (STRING)\n");}
             | INTEGER                                                                   {printf("Variable declarada y asignada (INT)\n");} 
             | REAL                                                                      {printf("Variable declarada y asignada (REAL)\n");}
             | NAME '(' ')'                                                              {printf("Llamada a funcion\n");}                                                              
             | NAME '(' parameter_to_function ')'                                        {printf("Llamada a funcion con parametros\n");}       
-            | '(' expression ')'                                                        
+            | '(' expression ')'  
+            | TYPE '(' expression ')'                                                   {printf("Casting de variable\n");}                                                        
             | expression '+' expression                                                 {printf("Suma\n");} 
             | expression '-' expression                                                 {printf("Resta\n");}
             | expression '*' expression                                                 {printf("Multiplicacion\n");}
@@ -128,6 +140,7 @@ expression  : NAME
             | expression OR expression                                                  {printf("OR logico\n");}
             | NOT '(' expression ')'                                                    {printf("NOT logico\n");}
             | expression COMPARE expression                                             {printf("Comparacion logica\n");}
+            | builtin_functions
             ;             
 
 parameter_to_dict : expression ':' expression              

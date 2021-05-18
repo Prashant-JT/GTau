@@ -87,7 +87,7 @@ label [A-Z_]+({digit}|[A-Z_])*
 <comment>\n        numlin++;
 <comment>"*"+"/"   BEGIN(INITIAL);
 
-[ \t]
+[ \t\r]
 \n                 {numlin++; return EOL; } 
 .                  { yyerror("error lexico"); }
 %%
