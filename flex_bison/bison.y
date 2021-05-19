@@ -31,7 +31,7 @@ void yyerror(char*);
 %token EOL
 
 %nonassoc <compare> COMPARE
-%nonassoc UMINUS
+%nonassoc UMINUS UPLUS
 
 %right '='
 %left '+' '-'
@@ -57,8 +57,7 @@ function_definition : FUNCTION TYPE NAME '(' parameter_function ')' '{' content 
                     ;
 
 content : /* nothing */                                                                       
-        | EOL content                                                                        
-        | statement EOL content   
+        | EOL content              
         | statement content                                                             
         ;
 
@@ -119,7 +118,7 @@ variable_definition : NAME '=' expression                                       
                     | NAME '/''=' expression                                            {printf("Variable dividida acortada\n");}
                     ;
 
-expression  : NAME                                                                                                                                    
+expression  : NAME                                                                                                                                   
             | CHAR                                                                      {printf("Variable declarada y asignada (CHAR)\n");}
             | STRING                                                                    {printf("Variable declarada y asignada (STRING)\n");}
             | INTEGER                                                                   {printf("Variable declarada y asignada (INT)\n");} 
@@ -127,7 +126,9 @@ expression  : NAME
             | NAME '(' ')'                                                              {printf("Llamada a funcion\n");}                                                              
             | NAME '(' parameter_to_function ')'                                        {printf("Llamada a funcion con parametros\n");}       
             | '(' expression ')'  
-            | TYPE '(' expression ')'                                                   {printf("Casting de variable\n");}                                                        
+            | TYPE '(' expression ')'                                                   {printf("Casting de variable\n");}    
+            | '-' expression %prec UMINUS     
+            | '+' expression %prec UPLUS                                                  
             | expression '+' expression                                                 {printf("Suma\n");} 
             | expression '-' expression                                                 {printf("Resta\n");}
             | expression '*' expression                                                 {printf("Multiplicacion\n");}
@@ -150,7 +151,6 @@ parameter_to_dict : expression ':' expression
 parameter_to_function : expression              
                       | expression ',' parameter_to_function                                    
                       ;
-
 
 %%
 

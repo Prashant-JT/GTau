@@ -8,8 +8,8 @@ char *substr(char *src, int start, int end);
 %x comment string
 letter [a-zA-Z_]
 digit  [0-9]
-integer ("+"|-)?{digit}+
-real ("+"|-)?{digit}+"."{digit}+
+integer {digit}+
+real {digit}+"."{digit}+
 name {letter}+({digit}|{letter})*
 char (\"[^\"]\")
 str (\"[^\"]*\")
