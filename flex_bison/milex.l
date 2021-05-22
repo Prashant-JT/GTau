@@ -60,8 +60,8 @@ label [A-Z_]+({digit}|[A-Z_])*
 "for"                   { return FOR;}
 "while"                 { return WHILE;}
 "break"                 { return BREAK; }
-"goto"                 { return GOTO; }
-#{label}:                 { return LABEL; }
+"goto"                  { return GOTO; }
+#{label}                { yylval.label = substr(yytext, 1, yyleng); return LABEL; }
 
 "function"              { return FUNCTION;}
 "return"                { return RETURN; }
@@ -79,7 +79,7 @@ label [A-Z_]+({digit}|[A-Z_])*
 {char}                  { yylval.str = substr(yytext, 1, yyleng-1); return CHAR; }
 {str}                   { yylval.str = substr(yytext, 1, yyleng-1); return STRING; }
 {integer}               { yylval.integer = atoi(yytext); return INTEGER; }
-{real}                  { yylval.real = atoi(yytext); return REAL;}
+{real}                  { yylval.real = atof(yytext); return REAL;}
 
 "/*"               BEGIN(comment);
 <comment>[^*\n]+   // eat comment in chunks

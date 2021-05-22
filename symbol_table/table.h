@@ -1,0 +1,79 @@
+extern int numlin; 
+void initList();
+
+struct symbol {
+  char *name;
+  int type;
+  int scope;
+  int intVal;
+  float floatVal;
+  double doubleVal;
+  char *stringVal;
+};
+
+struct ast {
+  int nodeType;
+  struct ast *left;
+  struct ast *right;
+};
+
+struct reference {
+  int nodeType;
+  struct symbol *sym;
+};
+
+struct variable {
+  int nodeType;
+  int type;
+  double val;
+  char *stringVal;
+};
+
+struct symbolAssign {
+  int nodeType;                 
+  char *name;
+  struct ast *value;                
+};
+
+struct condition {
+  int nodeType;
+  struct ast *cond; 
+  struct ast *left;
+  struct ast *right;
+};
+
+struct iterator {
+  int nodeType;
+  struct ast *declaration;
+  struct ast *cond;
+  struct ast *increment;
+  struct ast *left;
+};
+
+struct callFn {                
+  int nodeType;                 
+  struct ast *parameters;               
+  char *name;
+};
+
+struct symboList {
+  struct ast *actual;
+  struct symboList *next;
+};
+
+typedef struct node {
+  struct symbol *val;
+  struct node *next;
+}node_t;
+
+node_t *head;
+node_t *tail;
+
+struct ast *newReference(int varType, char *name);
+struct ast *newVariable(int type, double value, char *stringVal);
+struct ast *callFunction(char *name, struct ast *params);
+struct ast *newAST(int nodeType, struct ast *left, struct ast *right);
+struct ast *newAssignment(char *name, struct ast *value);
+struct ast *newIf(struct ast *cond, struct ast *left, struct ast *right);
+struct ast *newFor(struct ast *declaration, struct ast *cond, struct ast *increment, struct ast *left);
+void newFunction(int type, char *name, struct symboList *params, struct ast *content);

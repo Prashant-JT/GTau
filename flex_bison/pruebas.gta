@@ -1,129 +1,22 @@
-
-/* Función recursiva que calcula el factorial de un número */
-function int factorial(int num){
-    if (num == 1) {
-        return num;
-    } else {
-        return (num*factorial(num-1));
-    }
-}
-
-/* ------------------------------------------------------------- */
-
-/* Función que obtenga el valor más pequeño del vector */
-function getMin(vect vector) {
-    double min = get(vector, 0); /* Se asigna la primera posición del vector */
-
-    for(int i = 1; i < size(vector); i+=1) {
-        if (get(vector, i) < min) {
-            min = get(vector, i);
-        }
-    }
-
-    /* Se imprime el valor resultante sin salto de línea */
-    println(min); 
-}
-
-/* ------------------------------------------------------------- */
-
-/* Función que genera un vector con sizeVector */
-function vect fillVector(int sizeVector) {
-    vect[double] vector = [];
-
-    while(TRUE) {
-        append(vector, sizeVector*2.5);
-        sizeVector -= 1;
-
-        if (sizeVector <= -1) {
-            break;
-        }
-    }
-
-    pop(vector); /* Se elimina la última posición del vector */
-
-    return clone(vector); /* Se retorna un clon del vector */
-}
-
-/* ------------------------------------------------------------- */
-
-/* Función que prueba las funcionalidades de los diccionarios */
-function dict checkDicts() {
-    dict[string, int] nombreEdad = ["Pepito":30, "Maria":33];
-    append(nombreEdad, "Juancito", 45);
-    println(size(nombreEdad));
-
-    dict[string, int] nombreEdadClon = clon(nombreEdad);
-    /* Se retorna valor de la clave, y elimina el par clave-valor */
-    int edadPepito = pop(nombreEdad, "Pepito");
-    println(edadPepito); 
-
-    /* Se retorna valor de dicha clave */
-    int edadPepitonClon = get(nombreEdadClon, "Pepito");
-
-    return nombreEdadClon;
-}
-
-/* ------------------------------------------------------------- */
-
-/* Función que prueba las funcionalidades de las strings */
-function checkStrings() {
-    string comida = "Mi gato come comida";
-    string agua = "y agua";
-
-    print(comida);
-    print(" ");
-    println(agua);
-
-    string frase = append(comida, agua);
-    if (not(get(frase, 0) != "M") or get(frase, size(frase)-1) != "a") {
-        goto SALTO;
-    }
-
-    println(frase);
-
-    #SALTO:
-
-    println(get(frase, size(frase)-1)); /* Obtiene la última posición de la string */
-}
-
-/* ------------------------------------------------------------- */
-
-/* Función que prueba la funcionalidad de casting */
-function checkCasting(int val) {
-    float a = float(val);
-    double b = double(val);
-    char c = char(val); /* El valor debe estar entre 0 y 9, ambos inclusive. Si no sucede una excepción */
-
-    float d = 65.5;
-    string e = string(d);
-    int f = int(d);
-    int g = int(e);
-
-    int h = int("a"); /* Devuelve el valor ASCII del caracter */
-    println(h);
-    int i = int("5"); /* Devuelve el valor numérico del caracter */
-}
-
 function main () {
     /* Factorial de 5 */
-    int n = 5;
-    int resultado = factorial(n);
-    /* se imprimie por pantalla con salto de línea */
-    println(resultado);
+    int nombre = 5;
+    float nF = 8.5;
+    double nD = 90.5555555;
+    string s = "hola";
+    char c = "c";
+    a >= b;
+    (a > b) or (b == 5);
+    (a > b) and (b == 5);
+    a*c;
+    n/5;
+    -1+5;
+    int(a);
+    not(m == 67);
+    s += "5";
+    s -= 5;
+    s /= -5;
+    s *= 5.5; 
+}
 
-    /* Operaciones con vectores */
-    vect[double] vector = fillVector(10);
-    getMin(vector);
-    /* Se vacía el vector */
-    clear(vector); 
-
-    /* Operaciones con diccionarios */
-    dict[string, int] res = checkDicts();
-
-    /* Operaciones con strings */
-    checkStrings();
-
-    /* Operaciones con casting */
-    int value = 8; 
-    checkCasting(value);
-} 
+main();

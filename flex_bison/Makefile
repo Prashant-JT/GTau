@@ -17,7 +17,7 @@ delete:
 	rm -f lex.yy.c milex y.tab.* bison.tab.* output
 
 exec: 
-	gcc lex.yy.c bison.tab.c -o output -lfl
+	gcc lex.yy.c bison.tab.c ../symbol_table/table.c -o output -lfl
 
 run: delete bison milex exec
 
