@@ -13,7 +13,6 @@
 | Para identificar vectores | V |
 | - | - |
 | Para | FUNCIONES |
-| - | - |
 | Para print | P |
 | Para size | S |
 | Para append | H |
@@ -23,7 +22,6 @@
 | Para clon | Y |
 | - | - |
 | Para | EXPRESION |
-| - | - |
 | Para MINUS (resta expresion) | M |
 | Para PLUS (suma expresion) | U |
 | Para suma | + |
