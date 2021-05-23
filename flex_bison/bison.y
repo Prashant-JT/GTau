@@ -18,6 +18,7 @@ void yyerror(char*);
   int integer;
   int type;
   struct ast *node;
+  struct symboList *symbol;
 }
 
 %token <real> REAL
@@ -43,7 +44,8 @@ void yyerror(char*);
 %left '*' '/' '%' '^'
 %left '(' ')'
 
-%type <node> expression parameter_to_function content statement more_elsif variable_declaration variable_definition
+%type <node> expression parameter_to_function content statement more_elsif variable_declaration variable_definition builtin_functions
+%type <symbol> parameter_function
 %start initial_main
 
 %%
@@ -56,10 +58,10 @@ initial_main : /* nothing */
              | initial_main statement EOL                                         
              ;
 
-function_definition : FUNCTION TYPE NAME '(' parameter_function ')' '{' content '}'     { newfundef($2, $3, NULL, $7); } 
-                    | FUNCTION VECT NAME '(' parameter_function ')' '{' content '}'     {printf("Declaracion de funcion (RETURN) con parametros\n");}
-                    | FUNCTION DICT NAME '(' parameter_function ')' '{' content '}'     {printf("Declaracion de funcion (RETURN) con parametros\n");}  
-                    | FUNCTION NAME '(' parameter_function ')' '{' content '}'          {printf("Declaracion de funcion (NO-RETURN) con parametros\n");}          
+function_definition : FUNCTION TYPE NAME '(' parameter_function ')' '{' content '}'     { newFunction($2, $3, $5, $8); } 
+                    | FUNCTION VECT NAME '(' parameter_function ')' '{' content '}'     { newFunction(7, $3, $5, $8); }
+                    | FUNCTION DICT NAME '(' parameter_function ')' '{' content '}'     { newFunction(8, $3, $5, $8); }
+                    | FUNCTION NAME '(' parameter_function ')' '{' content '}'          { newFunction(0, $2, $4, $7); }          
                     ;
 
 content : /* nothing */                                                                 { $$ = NULL; }                                                         
@@ -72,13 +74,13 @@ content : /* nothing */                                                         
                                                                                         } 
         ;
 
-parameter_function : /*Nothing*/ 
-                   | TYPE NAME  
-                   | VECT NAME 
-                   | DICT NAME   
-                   | VECT NAME ',' parameter_function 
-                   | DICT NAME ',' parameter_function                                                  
-                   | TYPE NAME ',' parameter_function                                      
+parameter_function : /*Nothing*/                                                        { $$ = NULL; }
+                   | TYPE NAME                                                          { $$ = newSymboList(newAST('L', newReference($1, $2), newAssignment($2, newVariable($1, 0, ""))), NULL); }
+                   | VECT NAME                                                          { $$ = newSymboList(newAST('L', newReference(7, $2), newAssignment($2, newVector(0, $2, NULL))), NULL); }
+                   | DICT NAME                                                          
+                   | VECT NAME ',' parameter_function                                   { $$ = newSymboList(newAST('L', newReference(7, $2), newAssignment($2, newVector(0, $2, NULL))), $4); }
+                   | DICT NAME ',' parameter_function                                   
+                   | TYPE NAME ',' parameter_function                                   { $$ = newSymboList(newAST('L', newReference($1, $2), newAssignment($2, newVariable($1, 0, ""))), $4); }
                    ;
 
 statement : variable_declaration ';'                                                    
@@ -101,23 +103,23 @@ statement : variable_declaration ';'
 more_elsif : ELSIF '(' expression ')' '{' content '}'                                   { $$ = newIf($3, $6, NULL); }
            | ELSIF '(' expression ')' '{' content '}' more_elsif                        { $$ = newIf($3, $6, $8); }
 
-builtin_functions : PRINT '(' expression ')'                                            {printf("Funcion PRINT\n");}
-                  | PRINTLN '(' expression ')'                                          {printf("Funcion PRINTLN\n");}
-                  | SIZE '(' NAME ')'                                                   {printf("Funcion SIZE\n");}
-                  | APPEND '(' NAME ',' expression ')'                                  {printf("Funcion APPEND vectores\n");}
-                  | APPEND '(' NAME ',' expression ',' expression ')'                   {printf("Funcion APPEND diccionarios\n");}
-                  | POP '(' NAME ')'                                                    {printf("Funcion POP\n");}
-                  | POP '(' NAME ',' expression ')'                                     {printf("Funcion POP\n");}
-                  | CLEAR '(' NAME ')'                                                  {printf("Funcion CLEAR\n");}
-                  | GET '(' NAME ',' expression ')'                                     {printf("Funcion GET\n");}
-                  | CLONE '(' NAME ')'                                                  {printf("Funcion CLONE\n");}
+builtin_functions : PRINT '(' expression ')'                                            { $$ = newAST('P', $3, NULL); }
+                  | PRINTLN '(' expression ')'                                          { $$ = newAST('P', $3, newVariable(0, 0, NULL)); }
+                  | SIZE '(' NAME ')'                                                   { $$ = callFunction("S", newReference(0, $3)); }
+                  | APPEND '(' NAME ',' expression ')'                                  { $$ = callFunction("H", newAST('L', newReference(0, $3), $5)); }
+                  | APPEND '(' NAME ',' expression ',' expression ')'                   
+                  | POP '(' NAME ')'                                                    { $$ = callFunction("J", newReference(0, $3)); }
+                  | POP '(' NAME ',' expression ')'                                     { $$ = callFunction("J", newAST('L', newReference(0, $3), $5)); }
+                  | CLEAR '(' NAME ')'                                                  { $$ = callFunction("Q", newReference(0, $3)); }
+                  | GET '(' NAME ',' expression ')'                                     { $$ = callFunction("K", newAST('L', newReference(0, $3), $5)); }
+                  | CLONE '(' NAME ')'                                                  { $$ = callFunction("Y", newReference(0, $3)); }
                   ;
 
 variable_declaration  : TYPE NAME                                                       { $$ = newAST('L', newReference($1, $2), newAssignment($2, newVariable($1, 0, ""))); }
                       | TYPE NAME '=' expression                                        { $$ = newAST('L', newReference($1, $2), newAssignment($2, $4)); }
-                      | VECT '[' TYPE ']' NAME '=' '[' ']'                              
-                      | VECT '[' TYPE ']' NAME '=' '[' parameter_to_function ']'        
-                      | VECT '[' TYPE ']' NAME '=' expression                           
+                      | VECT '[' TYPE ']' NAME '=' '[' ']'                              { $$ = newVector($3, $5, NULL); }
+                      | VECT '[' TYPE ']' NAME '=' '[' parameter_to_function ']'        { $$ = newVector($3, $5, $8); } 
+                      | VECT '[' TYPE ']' NAME '=' expression                           { $$ = newVector($3, $5, $7); }
                       | DICT '[' TYPE ',' TYPE ']' NAME '=' '[' ']'                     
                       | DICT '[' TYPE ',' TYPE ']' NAME '=' '[' parameter_to_dict ']'     
                       | DICT '[' TYPE ',' TYPE ']' NAME '=' expression                                               
@@ -140,7 +142,7 @@ expression  : NAME                                                              
             | '(' expression ')'                                                        { $$ = $2; }
             | TYPE '(' expression ')'                                                   { $$ = newAST($1, $3, NULL); }
             | '-' expression %prec UMINUS                                               { $$ = newAST('M', $2, NULL); }
-            | '+' expression %prec UPLUS                                                { $$ = newAST('P', $2, NULL); }                                      
+            | '+' expression %prec UPLUS                                                { $$ = newAST('U', $2, NULL); }                                      
             | expression '+' expression                                                 { $$ = newAST('+', $1, $3); } 
             | expression '-' expression                                                 { $$ = newAST('-', $1, $3); }
             | expression '*' expression                                                 { $$ = newAST('*', $1, $3); }

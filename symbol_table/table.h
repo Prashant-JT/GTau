@@ -9,6 +9,8 @@ struct symbol {
   float floatVal;
   double doubleVal;
   char *stringVal;
+  struct symboList *params;
+  struct ast *content;
 };
 
 struct ast {
@@ -27,6 +29,13 @@ struct variable {
   int type;
   double val;
   char *stringVal;
+};
+
+struct vector {
+  int nodeType;
+  int type;
+  char *name;
+  struct ast *elements;
 };
 
 struct symbolAssign {
@@ -62,7 +71,7 @@ struct symboList {
 };
 
 typedef struct node {
-  struct symbol *val;
+  struct symbol *value;
   struct node *next;
 }node_t;
 
@@ -71,8 +80,10 @@ node_t *tail;
 
 struct ast *newReference(int varType, char *name);
 struct ast *newVariable(int type, double value, char *stringVal);
+struct ast *newVector(int type, char *name, struct ast *elements);
 struct ast *callFunction(char *name, struct ast *params);
 struct ast *newAST(int nodeType, struct ast *left, struct ast *right);
+struct symboList *newSymboList(struct ast *actual, struct symboList *next);
 struct ast *newAssignment(char *name, struct ast *value);
 struct ast *newIf(struct ast *cond, struct ast *left, struct ast *right);
 struct ast *newFor(struct ast *declaration, struct ast *cond, struct ast *increment, struct ast *left);

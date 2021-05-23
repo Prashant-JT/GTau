@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+int scope = 0;
+
 void initList() {
   if (!head){
     free(head);
@@ -52,10 +54,26 @@ struct ast *newVariable(int type, double value, char *stringVal) {
 
   var->val = value;
   var->type = type;
-  var->nodeType = 'V';
+  var->nodeType = 'E';
   var->stringVal = stringVal;
   
   return (struct ast *)var;
+}
+
+struct ast *newVector(int type, char *name, struct ast *elements) {
+  struct vector *vec = malloc(sizeof(struct vector));
+
+  if(!vec) {
+    fprintf(stderr,"Error: Out of space");
+    exit(0);
+  }
+  
+  vec->nodeType = 'V';
+  vec->type = type;
+  vec->name = name;
+  vec->elements = elements;
+
+  return (struct ast *)vec;
 }
 
 struct ast *callFunction(char *name, struct ast *params) {
@@ -85,6 +103,19 @@ struct ast *newAST(int nodeType, struct ast *left, struct ast *right) {
 
   printf("Tipo-%d Left-%d Right-%d\n", astVar->nodeType, left->nodeType, right->nodeType);
   return astVar;
+}
+
+struct symboList *newSymboList(struct ast *actual, struct symboList *next) {
+  struct symboList *symList = malloc(sizeof(struct symboList));
+
+  if(!symList) {
+    fprintf(stderr, "Error: Out of space");
+    exit(0);
+  }
+
+  symList->actual = actual;
+  symList->next = next;
+  return symList;
 }
 
 struct ast *newAssignment(char *name, struct ast *value) {
@@ -133,32 +164,68 @@ struct ast *newFor(struct ast *declaration, struct ast *cond, struct ast *increm
 
   return (struct ast *)iter;
 }
-/*
+
+static struct symbol *searchFunction(char *name) {
+  if (head == NULL) {
+    fprintf(stderr, "Error: Symbol table not initialized");
+    exit(1);
+  }
+
+  node_t *temp = head;
+
+  while(temp->next != NULL) {
+    temp = temp->next;
+    if (temp->value != NULL && temp->value->scope > 0 && (strcmp(temp->value->name, name) == 0)){
+      return temp->value;
+    }
+  }
+ 
+  return NULL;
+}
+
+void setScope() {
+  if (head == NULL) {
+    fprintf(stderr, "Error: Symbol table not initialized");
+    exit(1);
+  }
+
+  node_t *temp = head;
+  int maxScope = 0;
+
+  while(temp->next != NULL) {
+    temp = temp->next;
+    if (temp->value->scope > maxScope){
+      maxScope = temp->value->scope;
+    }
+  }
+
+  scope = maxScope + 1;
+}
+
 void newFunction(int type, char *name, struct symboList *params, struct ast *content) {
-  struct symbol *function = lookup_func(name);
+  struct symbol *function = searchFunction(name);
 
   if (function != NULL){
     fprintf(stderr, "Error: Function %s already defined", name);
     exit(1);
   }
 
-  set_free_scope();
+  setScope();
+  struct symbol *funcSymbol = malloc(sizeof(struct symbol));
 
-  struct symbol *sym = malloc(sizeof(struct symbol));
-
-  if(!sym) {
+  if(!funcSymbol) {
     fprintf(stderr, "Error: Out of space");
     exit(0);
   }
 
-  sym->name = name;
-  sym->type = type;
-  sym->syms = syms;
-  sym->scope = free_scope;
-  sym->funcs = funcs;
+  funcSymbol->name = name;
+  funcSymbol->type = type;
+  funcSymbol->scope = scope;
+  funcSymbol->params = params;
+  funcSymbol->content = content;
 
   tail->next = (node_t *)malloc(sizeof(node_t));
   tail = tail->next;
-  tail->val = sym;
-  free_scope = 0;
-}*/
+  tail->value = funcSymbol;
+  scope = 0;
+}
