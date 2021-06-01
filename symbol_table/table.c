@@ -40,7 +40,9 @@ struct ast *newReference(int varType, char *name) {
   ref->sym = sym;
   sym->type = varType;
   sym->name = name;
-  
+
+  eval((struct ast *)ref);
+
   return (struct ast *)ref;
 }
 
@@ -101,7 +103,6 @@ struct ast *newAST(int nodeType, struct ast *left, struct ast *right) {
   astVar->left = left;
   astVar->right = right;
 
-  printf("Tipo-%d Left-%d Right-%d\n", astVar->nodeType, left->nodeType, right->nodeType);
   return astVar;
 }
 
@@ -175,7 +176,7 @@ static struct symbol *searchFunction(char *name) {
 
   while(temp->next != NULL) {
     temp = temp->next;
-    if (temp->value != NULL && temp->value->scope > 0 && (strcmp(temp->value->name, name) == 0)){
+    if ( temp->value != NULL && temp->value->scope > 0 && (strcmp(temp->value->name, name) == 0) ){
       return temp->value;
     }
   }
@@ -206,7 +207,7 @@ void newFunction(int type, char *name, struct symboList *params, struct ast *con
   struct symbol *function = searchFunction(name);
 
   if (function != NULL){
-    fprintf(stderr, "Error: Function %s already defined", name);
+    fprintf(stderr, "Error: Function %s already defined ", name);
     exit(1);
   }
 
@@ -217,6 +218,13 @@ void newFunction(int type, char *name, struct symboList *params, struct ast *con
     fprintf(stderr, "Error: Out of space");
     exit(0);
   }
+  /*
+  struct symboList *temp = params;
+
+  while(temp->next != NULL) {
+    temp = temp->next;
+    printf("%i\n", temp->actual->nodeType);
+  }*/
 
   funcSymbol->name = name;
   funcSymbol->type = type;
@@ -228,4 +236,71 @@ void newFunction(int type, char *name, struct symboList *params, struct ast *con
   tail = tail->next;
   tail->value = funcSymbol;
   scope = 0;
+}
+
+// ----------------------------- Evaluate -------------------------- //
+
+struct symbol *lookup(char *symName) {
+  if (head == NULL) {
+    fprintf(stderr, "Error: Symbol table not initialized");
+    exit(1);
+  }
+
+  node_t *temp = head;
+
+  while(temp->next != NULL){
+    temp = temp->next;
+    printf("Variable %s \n", temp->value->name);
+    if (temp->value != NULL && temp->value->scope == scope && (strcmp(temp->value->name, symName) == 0)){
+      return temp->value;
+    }
+  }
+
+  return NULL;
+}
+
+struct symbol *evaluateReference(struct ast *a) {
+  struct reference *ref = (struct reference *)a;
+  struct symbol *sym = lookup(ref->sym->name);
+  
+  if (sym != NULL){
+    if (ref->sym->type != 0) sym->type = ref->sym->type;
+    return sym;
+  }
+
+  if (ref->sym->type == 0){
+    fprintf(stderr, "Error: Variable %s not defined\n", ref->sym->name);
+    exit(1);
+  }
+
+  ref->sym->scope = scope;
+  tail->next = (node_t *)malloc(sizeof(node_t));
+
+  if(!tail->next) {
+    fprintf(stderr, "Error: Out of space\n");
+    exit(0);
+  }
+
+  tail = tail->next;
+  tail->value = ref->sym;
+
+  return ref->sym;
+}
+
+struct symbol *eval(struct ast *a) {
+    if(!a) {
+        fprintf(stderr, "Error: Internal error, null evaluate");
+        exit(1);
+    }
+
+    struct symbol *res = malloc(sizeof(struct symbol));
+
+    switch(a->nodeType) {
+        // Name reference
+        case 'R': 
+            res = evaluateReference(a);
+            break;
+    }
+
+    return res;
 }

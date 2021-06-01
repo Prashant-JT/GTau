@@ -1,4 +1,4 @@
-extern int numlin; 
+extern int numlin;
 void initList();
 
 struct symbol {
@@ -88,3 +88,8 @@ struct ast *newAssignment(char *name, struct ast *value);
 struct ast *newIf(struct ast *cond, struct ast *left, struct ast *right);
 struct ast *newFor(struct ast *declaration, struct ast *cond, struct ast *increment, struct ast *left);
 void newFunction(int type, char *name, struct symboList *params, struct ast *content);
+
+
+struct symbol *lookup(char *symName);
+struct symbol *evaluateReference(struct ast *a);
+struct symbol *eval(struct ast *a);
