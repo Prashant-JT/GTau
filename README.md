@@ -1,12 +1,13 @@
 # GTau
 
 | Uso | Clave |
+| - | - |
 | Para | GENERAL |
 | Nueva referencia  | R |
 | Nueva variable | E |
 | Llamda a función | C |
 | Llamada a acasting | X |
-| lista parámetros para función | L |
+| Lista parámetros para función | L |
 | Nuevo condicional (if) | I |
 | Nuevo bucle (for) | F |
 | Nuevo bucle (while) | W |
