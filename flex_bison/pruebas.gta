@@ -1,0 +1,6 @@
+function main (int nombre) {
+    /* Factorial de 5 */
+    nombre = 2;
+    char a = "a";  
+    int a = 3;
+}

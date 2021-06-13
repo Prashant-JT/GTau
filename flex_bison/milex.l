@@ -1,15 +1,15 @@
 %{
 # include <string.h>
 # include "bison.tab.h"
-int numlin = 1;
+int numlin = 1; 
 char *substr(char *src, int start, int end);
 %}
 
 %x comment string
 letter [a-zA-Z_]
 digit  [0-9]
-integer ("+"|-)?{digit}+
-real ("+"|-)?{digit}+"."{digit}+
+integer {digit}+
+real {digit}+"."{digit}+
 name {letter}+({digit}|{letter})*
 char (\"[^\"]\")
 str (\"[^\"]*\")
@@ -55,13 +55,13 @@ label [A-Z_]+({digit}|[A-Z_])*
 "dict"                  { return DICT; }
 
 "if"                    { return IF;}
-"elsif"                  { return ELSE;}
+"elsif"                  { return ELSIF;}
 "else"                  { return ELSE;}
 "for"                   { return FOR;}
 "while"                 { return WHILE;}
 "break"                 { return BREAK; }
-"goto"                 { return GOTO; }
-#{label}:                 { return LABEL; }
+"goto"                  { return GOTO; }
+#{label}                { yylval.label = substr(yytext, 1, yyleng); return LABEL; }
 
 "function"              { return FUNCTION;}
 "return"                { return RETURN; }
@@ -74,12 +74,12 @@ label [A-Z_]+({digit}|[A-Z_])*
 "get"                   { return GET; }
 "clone"                 { return CLONE; }
 
-{name}                  { yylval.name = yytext; return NAME; }
+{name}                  { yylval.name = substr(yytext, 0, yyleng); return NAME; }
 
 {char}                  { yylval.str = substr(yytext, 1, yyleng-1); return CHAR; }
 {str}                   { yylval.str = substr(yytext, 1, yyleng-1); return STRING; }
 {integer}               { yylval.integer = atoi(yytext); return INTEGER; }
-{real}                  { yylval.real = atoi(yytext); return REAL;}
+{real}                  { yylval.real = atof(yytext); return REAL;}
 
 "/*"               BEGIN(comment);
 <comment>[^*\n]+   // eat comment in chunks
@@ -87,7 +87,7 @@ label [A-Z_]+({digit}|[A-Z_])*
 <comment>\n        numlin++;
 <comment>"*"+"/"   BEGIN(INITIAL);
 
-[ \t]
+[ \t\r]
 \n                 {numlin++; return EOL; } 
 .                  { yyerror("error lexico"); }
 %%
