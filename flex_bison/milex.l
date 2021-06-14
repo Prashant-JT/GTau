@@ -40,41 +40,22 @@ label [A-Z_]+({digit}|[A-Z_])*
 "=="                    { yylval.compare = 5; return COMPARE; }
 "!="                    { yylval.compare = 6; return COMPARE; }  
 
-"and"                    { return AND; }
-"or"                    { return OR; }
-"not"                    { return NOT; }
-
 "int"                   { yylval.type = 1; return TYPE; }
 "double"                 { yylval.type = 2; return TYPE; }
 "float"                  { yylval.type = 3; return TYPE; }
-"boolean"                  { yylval.type = 4; return TYPE; }
-"char"                  { yylval.type = 5; return TYPE; }
-"string"                  { yylval.type = 6; return TYPE; }
-
-"vect"                  { return VECT; }
-"dict"                  { return DICT; }
+"void"                  { yylval.type = 4; return TYPE; }
+"string"                  { yylval.type = 5; return TYPE; }
 
 "if"                    { return IF;}
-"elsif"                  { return ELSIF;}
 "else"                  { return ELSE;}
-"for"                   { return FOR;}
 "while"                 { return WHILE;}
 "break"                 { return BREAK; }
-"goto"                  { return GOTO; }
-#{label}                { yylval.label = substr(yytext, 1, yyleng); return LABEL; }
 
 "function"              { return FUNCTION;}
 "return"                { return RETURN; }
 "print"                 { return PRINT; }
-"println"               { return PRINTLN; }
-"size"                  { return SIZE; }
-"append"                { return APPEND; }
-"pop"                   { return POP; }
-"clear"                 { return CLEAR; }
-"get"                   { return GET; }
-"clone"                 { return CLONE; }
 
-{name}                  { yylval.name = yytext; return NAME; }
+{name}                  { yylval.name = substr(yytext, 0, yyleng); return NAME; }
 
 {char}                  { yylval.str = substr(yytext, 1, yyleng-1); return CHAR; }
 {str}                   { yylval.str = substr(yytext, 1, yyleng-1); return STRING; }

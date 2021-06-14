@@ -1,95 +1,93 @@
 extern int numlin;
-void initList();
 
-struct symbol {
-  char *name;
-  int type;
-  int scope;
-  int intVal;
-  float floatVal;
-  double doubleVal;
-  char *stringVal;
-  struct symboList *params;
+struct ast
+{
+  int nodeType;
+  struct ast *left;
+  struct ast *right;
+};
+
+struct reg
+{
+  int vector;
+  int length;
+  int reference;
+  struct TypeSymbol *type;
+  char *label;
+  int index;
+};
+
+struct ifFlow
+{
+  int nodeType;
+  struct ast *cond;
+  struct ast *ifBody;
+  struct ast *elseBody;
+};
+
+struct flow
+{
+  int nodeType;
   struct ast *content;
 };
 
-struct ast {
+struct callFunction
+{
   int nodeType;
-  struct ast *left;
-  struct ast *right;
+  char *name;
+  struct ast *params;
 };
 
-struct reference {
+struct declaration
+{
   int nodeType;
-  struct symbol *sym;
+  char *name;
+  struct TypeSymbol *type;
+  int length;
 };
 
-struct variable {
+struct functionAST
+{
   int nodeType;
-  int type;
-  double val;
+  char *name;
+  struct TypeSymbol *type;
+  struct ast *params;
+  struct ast *content;
+};
+
+struct reference
+{
+  int nodeType;
+  int rightHand;
+  char *name;
+  struct ast *a;
+};
+
+struct constant
+{
+  int nodeType;
+  struct TypeSymbol *type;
+  double realVal;
   char *stringVal;
+  int vector;
 };
 
-struct vector {
-  int nodeType;
-  int type;
-  char *name;
-  struct ast *elements;
-};
-
-struct symbolAssign {
-  int nodeType;                 
-  char *name;
-  struct ast *value;                
-};
-
-struct condition {
-  int nodeType;
-  struct ast *cond; 
-  struct ast *left;
-  struct ast *right;
-};
-
-struct iterator {
-  int nodeType;
-  struct ast *declaration;
-  struct ast *cond;
-  struct ast *increment;
-  struct ast *left;
-};
-
-struct callFn {                
-  int nodeType;                 
-  struct ast *parameters;               
-  char *name;
-};
-
-struct symboList {
-  struct ast *actual;
-  struct symboList *next;
-};
-
-typedef struct node {
-  struct symbol *value;
-  struct node *next;
-}node_t;
-
-node_t *head;
-node_t *tail;
-
-struct ast *newReference(int varType, char *name);
-struct ast *newVariable(int type, double value, char *stringVal);
-struct ast *newVector(int type, char *name, struct ast *elements);
-struct ast *callFunction(char *name, struct ast *params);
 struct ast *newAST(int nodeType, struct ast *left, struct ast *right);
-struct symboList *newSymboList(struct ast *actual, struct symboList *next);
-struct ast *newAssignment(char *name, struct ast *value);
-struct ast *newIf(struct ast *cond, struct ast *left, struct ast *right);
-struct ast *newFor(struct ast *declaration, struct ast *cond, struct ast *increment, struct ast *left);
-void newFunction(int type, char *name, struct symboList *params, struct ast *content);
+struct ast *newIf(struct ast *cond, struct ast *ifBody, struct ast *elseBody);
+struct ast *newList(struct ast *left, struct ast *right);
+struct ast *newCallFunction(char *name, struct ast *params);
+struct ast *newDeclaration(int type, char *name);
+struct ast *newVectDeclaration(int type, char *name, int length);
+struct ast *newIndexReference(char *name, struct ast *index);
+struct ast *newRightDeclaration(struct ast *ref);
+struct ast *newFunction(int type, char *name, struct ast *params, struct ast *content);
+struct ast *newNothing();
+struct ast *newAssign(struct ast *left, struct ast *right);
+struct ast *newReference(char *name);
+struct ast *newChar(char *charac);
+struct ast *newString(char *stringValue);
+struct ast *newNumber(int type, double numberVal);
+void manageConditions(struct ast *cond, int label);
 
-
-struct symbol *lookup(char *symName);
-struct symbol *evaluateReference(struct ast *a);
-struct symbol *eval(struct ast *a);
+struct reg * eval(struct ast *a);
+void treefree(struct ast *a);
