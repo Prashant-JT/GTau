@@ -1,0 +1,62 @@
+/* Función recursiva que decrementa un contador hasta llegar a 0 */
+function int recursive (int num) {
+    if (num == 0) {
+        print("%s\n", "Ha llegado al final");         
+    } else {
+        recursive(num-1);
+    }
+}
+
+/* 
+ Función que llena un vector "double" 
+ */
+function void fillVector() {
+    int num = 0;
+    double [50] vect;
+    while (num < 100) {
+        vect[num] = (num*num) + 0.5;        
+        num += 1;
+        if (num >= 50) {
+            break;
+        }
+    }
+    print("El vector tiene %d elementos", num);
+}
+
+/* Función que se encarga de realizar operaciones matemáticas */
+function int calculator(float a, float b, string which) {
+    float res = 0;
+    if (which == "+") {
+        res = a+b;
+        res += 1;
+    }
+    if (which == "-") {
+        res = a-b;
+        res -= 1;
+    }
+    if (which == "*") {
+        res = a*b;
+        res *= 2;
+    }
+    if (which == "/") {
+        res = a/b;
+        res /= 2;
+    }
+    if (which == "%") {
+        res = a%b;
+    }
+    if (which == "^") {
+        res = a^b;
+    }
+    print("Resultado = %f", res);
+}
+
+/* 
+ * Llamadas a funciones 
+ */
+recursive(20);
+fillVector();
+calculator(2.5, 2.5, +);
+calculator(2.5, 2.5, -);
+calculator(2.5, 2.5, *);
+calculator(2.5, 2.5, /);
